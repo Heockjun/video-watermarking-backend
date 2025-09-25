@@ -36,12 +36,12 @@ app = Flask(__name__)
 # [수정] CORS 설정을 환경 변수에서 프론트엔드 URL을 읽어오도록 변경
 # 개발 환경에서는 localhost, 배포 환경에서는 Vercel URL을 허용합니다.
 frontend_url = os.environ.get('FRONTEND_URL')
-if frontend_url:  # 배포 환경
-    origins = ["http://localhost:3000", "http://127.0.0.1:3000", frontend_url]
-else:  # 로컬 개발 환경
-    origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+if frontend_url:
+    # Vercel 주소 뒤에 붙는 / 를 제거하여 정확한 Origin과 일치시킵니다.
+    allowed_origins.append(frontend_url.rstrip('/'))
 
-CORS(app, origins=origins, supports_credentials=True)
+CORS(app, origins=allowed_origins, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # [추가] 데이터베이스 및 인증 설정
 # [수정] 서버가 재시작되어도 JWT 서명이 일관되도록 고정된 시크릿 키를 사용합니다.
