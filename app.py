@@ -36,9 +36,9 @@ app = Flask(__name__)
 # [수정] CORS 설정을 환경 변수에서 프론트엔드 URL을 읽어오도록 변경
 # 개발 환경에서는 localhost, 배포 환경에서는 Vercel URL을 허용합니다.
 frontend_url = os.environ.get('FRONTEND_URL')
-if frontend_url: # 배포 환경
+if frontend_url:  # 배포 환경
     origins = ["http://localhost:3000", "http://127.0.0.1:3000", frontend_url]
-else: # 로컬 개발 환경
+else:  # 로컬 개발 환경
     origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 CORS(app, origins=origins, supports_credentials=True)
