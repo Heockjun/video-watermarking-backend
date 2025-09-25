@@ -1,0 +1,14 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Database
+site.db
+
+# User Uploads and Outputs
+uploads/
+outputs/
