@@ -33,15 +33,20 @@ def binary_to_text(binary_string):
 
 # --- Flask 애플리케이션 설정 ---
 app = Flask(__name__)
-# [수정] CORS 설정을 단순화하고 모든 경로에 적용하여 문제를 해결합니다.
-CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"], supports_credentials=True)
+# [수정] CORS 설정을 환경 변수에서 프론트엔드 URL을 읽어오도록 변경
+# 개발 환경에서는 localhost, 배포 환경에서는 Vercel URL을 허용합니다.
+frontend_url = os.environ.get('FRONTEND_URL')
+allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
+CORS(app, origins=allowed_origins, supports_credentials=True)
 
 # [추가] 데이터베이스 및 인증 설정
 # [수정] 서버가 재시작되어도 JWT 서명이 일관되도록 고정된 시크릿 키를 사용합니다.
 # 실제 운영 환경에서는 이 값을 환경 변수에서 불러와야 합니다.
-STATIC_SECRET_KEY = "a-super-secret-and-static-key-for-development-only"
-app.config['SECRET_KEY'] = STATIC_SECRET_KEY
-app.config['JWT_SECRET_KEY'] = STATIC_SECRET_KEY
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-super-secret-and-static-key-for-development-only')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'a-super-secret-and-static-key-for-development-only')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -50,7 +55,7 @@ jwt = JWTManager(app)
 # [추가] 암호화 설정
 # Fernet 키는 32바이트여야 합니다. SECRET_KEY를 기반으로 일관된 키를 생성합니다.
 # 키가 32바이트보다 길 경우 잘라내고, 짧을 경우 패딩합니다.
-key_32_bytes = STATIC_SECRET_KEY.encode().ljust(32)[:32]
+key_32_bytes = app.config['SECRET_KEY'].encode().ljust(32)[:32]
 fernet_key = base64.urlsafe_b64encode(key_32_bytes)
 cipher_suite = Fernet(fernet_key)
 
